@@ -1,0 +1,6 @@
+boto3>=1.42.79
+fastapi>=0.135.2
+firebase-admin>=7.3.0
+python-dotenv>=1.2.2
+python-multipart>=0.0.22
+uvicorn>=0.42.0
