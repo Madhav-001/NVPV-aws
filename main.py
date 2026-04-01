@@ -2,6 +2,7 @@ import uuid
 import boto3
 import firebase_admin
 from fastapi import FastAPI, UploadFile, File, Header, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from firebase_admin import credentials, auth
 from botocore.exceptions import NoCredentialsError
 from dotenv import load_dotenv
@@ -11,6 +12,15 @@ load_dotenv()
 
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # ==============================
 # 🔐 Firebase Setup
