@@ -1,7 +1,8 @@
 import uuid
 import boto3
 import firebase_admin
-from fastapi import FastAPI, UploadFile, File, Header, HTTPException
+from fastapi import FastAPI, UploadFile, File, Header, HTTPException, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from firebase_admin import credentials, auth
 from botocore.exceptions import NoCredentialsError
@@ -12,6 +13,7 @@ load_dotenv()
 
 
 app = FastAPI()
+security = HTTPBearer()
 
 app.add_middleware(
     CORSMiddleware,
@@ -93,43 +95,30 @@ async def upload_video(video: UploadFile = File(...)):
 @app.get("/get-video-url/")
 def get_video_url(
     file_key: str,
-    authorization: str = Header(...)
+    credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
-    # Extract token
-    if not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Invalid auth header")
-
-    token = authorization.split("Bearer ")[-1]
+    token = credentials.credentials
     user = verify_token(token)
-
-    # Admin check
 
     if user:
         user_id = user.get("uid")
     else:
-        print("User not authenticated")
         raise HTTPException(status_code=403, detail="Admin access only")
 
-    try:
-        # Generate secure URL (1 hour)
-        url = s3.generate_presigned_url(
-            "get_object",
-            Params={
-                "Bucket": S3_BUCKET,
-                "Key": file_key
-            },
-            ExpiresIn=3600
-        )
+    url = s3.generate_presigned_url(
+        "get_object",
+        Params={
+            "Bucket": S3_BUCKET,
+            "Key": file_key
+        },
+        ExpiresIn=3600
+    )
 
-        return {
-            "user_id": user_id,
-            "file_key": file_key,
-            "video_url": url
-        }
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
+    return {
+        "user_id": user_id,
+        "file_key": file_key,
+        "video_url": url
+    }
 
 # ==============================
 # ❤️ Health Check
