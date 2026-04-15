@@ -52,10 +52,6 @@ def verify_token(token: str):
         raise HTTPException(status_code=401, detail="Invalid Firebase token")
 
 
-def is_admin(user):
-    return user.get("admin", False)
-
-
 # ==============================
 # 📤 Upload Video (PUBLIC)
 # ==============================
@@ -107,7 +103,11 @@ def get_video_url(
     user = verify_token(token)
 
     # Admin check
-    if not is_admin(user):
+
+    if user:
+        user_id = user.get("uid")
+    else:
+        print("User not authenticated")
         raise HTTPException(status_code=403, detail="Admin access only")
 
     try:
@@ -122,7 +122,8 @@ def get_video_url(
         )
 
         return {
-            "status": "success",
+            "user_id": user_id,
+            "file_key": file_key,
             "video_url": url
         }
 
