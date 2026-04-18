@@ -111,7 +111,8 @@ def get_video_url(
             "Bucket": S3_BUCKET,
             "Key": file_key
         },
-        ExpiresIn=3600
+        # ExpiresIn=3600
+        ExpiresIn=129600
     )
 
     return {
