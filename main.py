@@ -64,7 +64,7 @@ def get_size_mb(path):
 
 def run_ffmpeg(input_path, output_path, crf, scale=None):
     command = [
-        "ffmpeg",
+        "/usr/bin/ffmpeg",
         "-i", input_path,
         "-vcodec", "libx264",
         "-crf", str(crf),
@@ -132,7 +132,7 @@ async def upload_video(video: UploadFile = File(...)):
             )
 
         # Upload to S3
-        file_key = f"delete/{uuid.uuid4()}.mp4"
+        file_key = f"videos/{uuid.uuid4()}.mp4"
 
         with open(output_path, "rb") as f:
             s3.upload_fileobj(
